@@ -13,6 +13,13 @@ class ElasticsearchProvider extends ServiceProvider
      */
     public function boot()
     {
+        //php artisan es:init model
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                \ScoutEngines\Elasticsearch\EsInit::class,
+            ]);
+        }
+
         app(EngineManager::class)->extend('elasticsearch', function($app) {
             return new ElasticsearchEngine(ElasticBuilder::create()
                 ->setHosts(config('scout.elasticsearch.hosts'))

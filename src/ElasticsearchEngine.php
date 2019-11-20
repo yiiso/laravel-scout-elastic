@@ -131,14 +131,22 @@ class ElasticsearchEngine extends Engine
      */
     protected function performSearch(Builder $builder, array $options = [])
     {
+        $fields = [];
+        foreach ($builder->model->toSearchableArray() as $key => $value){
+            $fields[$key] = (object)[];
+        }
+
         $params = [
             'index' => $this->index,
             'type' => $builder->index ?: $builder->model->searchableAs(),
             'body' => [
                 'query' => [
                     'bool' => [
-                        'must' => [['query_string' => [ 'query' => "*{$builder->query}*"]]]
+                        'must' => [['query_string' => [ 'query' => "{$builder->query}"]]]
                     ]
+                ],
+                "highlight" => [
+                    "fields" => $fields
                 ]
             ]
         ];
@@ -215,12 +223,21 @@ class ElasticsearchEngine extends Engine
         }
 
         $keys = collect($results['hits']['hits'])->pluck('_id')->values()->all();
+        $source = [];
+
+        foreach ($results['hits']['hits'] as $row){
+            $source[$row['_id']] = $row['highlight'];
+        }
 
         return $model->getScoutModelsByIds(
-                $builder, $keys
-            )->filter(function ($model) use ($keys) {
-                return in_array($model->getScoutKey(), $keys);
-            });
+            $builder, $keys
+        )->filter(function ($model) use ($keys) {
+            return in_array($model->getScoutKey(), $keys);
+        })->map(function ($item,$key) use($source,$model) {
+            $item['highlight'] = $source[$item[$model->getKeyName()]];
+            return $item;
+        });
+
     }
 
     /**

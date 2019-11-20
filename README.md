@@ -58,6 +58,12 @@ After you've published the Laravel Scout package configuration:
 Now you can use Laravel Scout as described in the [official documentation](https://laravel.com/docs/5.3/scout)
 ## Credits
 
+## 增加中文分词及关键词高亮显示
+```
+php artisan es:init \\Eloquent\\Model
+
+```
+
 - [Erick Tamayo](https://github.com/ericktamayo)
 - [All Contributors](../../contributors)
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace ScoutEngines\Elasticsearch;
 
 use Illuminate\Console\Command;
 
